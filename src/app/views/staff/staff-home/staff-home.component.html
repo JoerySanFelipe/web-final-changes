@@ -1,0 +1,143 @@
+<div class="container-fluid h-100 p-3 overflow-hidden">
+  <div
+    class="d-flex align-items-stretch h-100 overflow-hidden bg-white rounded p-3"
+  >
+    <div class="w-75 overflow-auto">
+      <div
+        class="d-flex align-items-center justify-content-between"
+        style="padding-left: 1rem; padding-right: 1rem; padding-bottom: 10px"
+      >
+        <h6>Cashier : {{ _users?.name }}</h6>
+        <div class="input-group w-25">
+          <input
+            type="text"
+            class="search-input w-100"
+            placeholder="Search product name per category"
+            [(ngModel)]="searchText"
+            (input)="search()"
+          />
+        </div>
+      </div>
+      <ul class="nav nav-pills">
+        <li
+          class="nav-item"
+          *ngFor="let category of _categories; let i = index"
+        >
+          <a
+            class="nav-link"
+            [class.active]="i === activeTab"
+            (click)="selectTab(i)"
+          >
+            {{ category.toUpperCase() }}
+          </a>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div
+          class="tab-pane"
+          *ngFor="let category of _categories; let i = index"
+          [class.active]="i === activeTab"
+        >
+          <div class="container">
+            <div class="flex-container">
+              <div
+                class="child-container"
+                *ngFor="let product of filteredProducts[category]"
+              >
+                <div
+                  class="card p-3"
+                  style="width: 100%; height: 100%"
+                  (click)="addOrder(product)"
+                >
+                  <img
+                    [src]="product.image"
+                    class="card-img-top"
+                    height="55%"
+                    width="100%"
+                    alt="product image"
+                  />
+                  <div class="card-body">
+                    <h6 class="card-title fs-6" id="product-title">
+                      {{ product.name }}
+                    </h6>
+
+                    <span
+                      [ngClass]="{
+                        'text-bg-danger':
+                          toProductStatus(product) === 'expired' ||
+                          toProductStatus(product) === 'out of stock',
+                        'text-bg-warning':
+                          toProductStatus(product) === 'low stock',
+                        'text-bg-success':
+                          toProductStatus(product) === 'in stock'
+                      }"
+                      class="badge"
+                    >
+                      {{ toProductStatus(product) }}
+                    </span>
+
+                    <h5 class="card-text text-success fs-6">
+                      {{ formatPrice(product.price) }}
+                    </h5>
+                    <span class="text-secondary fs-6"
+                      >{{ product.stocks }} items left</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex" style="height: 100%">
+      <div class="vr"></div>
+    </div>
+    <div class="flex-grow-1 overflow-hidden d-flex flex-column">
+      <ul class="list-group list-group-flush overflow-auto flex-grow-1 w-100">
+        <li class="list-group-item" *ngFor="let order of _cart; index as index">
+          <div class="d-flex gap-2 p-1 w-100">
+            <img
+              [src]="order.image"
+              class="rounded"
+              alt="Product image"
+              style="width: 80px; height: 80px"
+            />
+
+            <div class="d-flex flex-grow-1 justify-content-between flex-column">
+              <h6 class="card-title" id="product-title">
+                {{ order.name }}
+              </h6>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="container d-flex gap-1 align-items-center">
+                  <button
+                    class="btn btn-light btn-sm"
+                    (click)="decreaseQuantity(index)"
+                  >
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <h6 class="fs-6 fw-bold">{{ order.quantity }}</h6>
+
+                  <button
+                    class="btn btn-light btn-sm"
+                    (click)="increaseQuantity(index, order)"
+                  >
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+
+                <h5 class="card-text text-success fw-bold fs-6">
+                  {{ formatPrice(order.price * order.quantity) }}
+                </h5>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <button class="btn btn-danger w-100 btn-lg m-3" (click)="openModal()">
+        Checkout ( {{ subtotal(_cart) }})
+      </button>
+    </div>
+  </div>
+</div>

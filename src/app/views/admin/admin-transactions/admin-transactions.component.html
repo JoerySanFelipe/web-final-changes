@@ -1,0 +1,145 @@
+<div class="container-fluid h-100 p-3">
+  <div class="box d-flex flex-column gap-1 w-100 overflow-y-auto">
+    <div class="d-flex align-items-center justify-content-between p-3 w-100">
+      <h5>Transactions</h5>
+      <div class="d-flex gap-2">
+        <div class="input-group" style="width: 300px">
+          <input
+            type="text"
+            class="search-input w-100"
+            placeholder="Search Transaction id..."
+            [(ngModel)]="searchText"
+            (input)="search()"
+          />
+        </div>
+
+        <div ngbDropdown>
+          <button
+            type="button"
+            class="btn btn-lg btn-outline-secondary"
+            id="dropdownConfig"
+            ngbDropdownToggle
+          >
+            Generate Report
+          </button>
+          <div ngbDropdownMenu aria-labelledby="dropdownConfig" class="w-100">
+            <button ngbDropdownItem (click)="printTransaction(0, 'Pending')">
+              Pending
+            </button>
+            <button ngbDropdownItem (click)="printTransaction(1, 'Cancelled')">
+              Cancelled
+            </button>
+            <button ngbDropdownItem (click)="printTransaction(2, 'Accepted')">
+              Accepted
+            </button>
+            <button ngbDropdownItem (click)="printTransaction(3, 'To Deliver')">
+              To Deliver
+            </button>
+            <button ngbDropdownItem (click)="printTransaction(4, 'Pick up')">
+              Pick Up
+            </button>
+            <button
+              ngbDropdownItem
+              (click)="printTransaction(5, 'Out of Delivery')"
+            >
+              Out of Delivery
+            </button>
+            <button ngbDropdownItem (click)="printTransaction(6, 'Failed')">
+              Failed
+            </button>
+            <button ngbDropdownItem (click)="printTransaction(7, 'Completed')">
+              Completed
+            </button>
+
+            <div class="dropdown-divider"></div>
+            <button ngbDropdownItem (click)="printByType(0, 'Walk In')">
+              Walk in
+            </button>
+            <button ngbDropdownItem (click)="printByType(1, 'Pick Up')">
+              Pick up
+            </button>
+            <button ngbDropdownItem (click)="printByType(2, 'Delivery')">
+              Delivery
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- table -->
+
+    <table class="table table-hover table-borderless m-3">
+      <thead>
+        <tr>
+          <th scope="col">Invoice ID</th>
+          <th scope="col">Type</th>
+          <th scope="col">Order Items</th>
+          <th scope="col">Payment</th>
+          <th scope="col">Status</th>
+          <th scope="col">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let transaction of transactions$"
+          (click)="navigateToViewTransaction(transaction.id)"
+        >
+          <th scope="row">{{ transaction.id }}</th>
+          <td>{{ transaction.type }}</td>
+          <td>{{ transaction.orderList.length }}</td>
+          <td>
+            {{
+              transaction.payment.amount.toLocaleString("en-us", {
+                style: "currency",
+                currency: "PHP"
+              })
+            }}
+            - {{ transaction.payment.type }}
+            <span
+              class="badge"
+              [style.backgroundColor]="
+                transaction.payment.status === 'PAID' ? 'green' : 'yellow'
+              "
+              [style.color]="
+                transaction.payment.status === 'PAID' ? 'white' : 'black'
+              "
+              >{{ transaction.payment.status }}</span
+            >
+          </td>
+          <td>
+            <span
+              class="badge"
+              [style.backgroundColor]="getBackgroundColor(transaction.status)"
+              [style.color]="getTextColor(transaction.status)"
+              >{{ transaction.status }}</span
+            >
+          </td>
+          <td>{{ transaction.createdAt.toDateString() }}</td>
+        </tr>
+        <tr *ngIf="transactions$.length === 0">
+          <td colspan="6" style="text-align: center">No transactions found</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between p-2">
+      <ngb-pagination
+        [collectionSize]="collectionSize"
+        [(page)]="page"
+        [pageSize]="pageSize"
+        (pageChange)="refreshTransactions()"
+      >
+      </ngb-pagination>
+
+      <select
+        class="form-select"
+        style="width: auto"
+        [(ngModel)]="pageSize"
+        (ngModelChange)="refreshTransactions()"
+      >
+        <option [ngValue]="20">20 items per page</option>
+        <option [ngValue]="30">30 items per page</option>
+        <option [ngValue]="50">50 items per page</option>
+      </select>
+    </div>
+  </div>
+</div>
